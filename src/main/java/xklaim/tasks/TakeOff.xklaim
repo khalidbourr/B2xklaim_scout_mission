@@ -1,0 +1,37 @@
+package xklaim.activities
+
+import java.util.concurrent.atomic.AtomicBoolean
+import std_msgs.msg.dds.String
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc TakeOff(java.lang.String edge) {
+	
+    val rosnode = new ROS2Node("xklaim_takeoff_x500")
+
+    val cmdTopic = new ROS2Topic<String>("/x500/command", String)
+    val cmdPub = rosnode.createPublisher(cmdTopic)
+
+    val statusTopic = new ROS2Topic<String>("/x500/status", String)
+    val hovering = new AtomicBoolean(false)
+    rosnode.createSubscription(statusTopic, [reader |
+        val msg = reader.^read()
+        if (msg.data.toString().equals("hovering")) {
+            hovering.set(true)
+        }
+    ])
+
+    val cmdMsg = new String()
+    cmdMsg.data.append("takeoff")
+    Thread.sleep(1000)
+    cmdPub.publish(cmdMsg)
+    println("[TakeOff] takeoff requested")
+
+    while (!hovering.get()) {
+        Thread.sleep(50)
+    }
+    println("[TakeOff] hovering reached")
+
+    rosnode.close()
+    out(edge)@self
+}

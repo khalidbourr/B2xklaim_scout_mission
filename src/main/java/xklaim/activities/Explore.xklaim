@@ -1,0 +1,30 @@
+package xklaim.activities
+
+import xklaim.branches.AND_Gateway_072gr8o_Branch0
+import xklaim.branches.AND_Gateway_072gr8o_Branch1
+import xklaim.tasks.Filter_Discovered_Area
+
+proc Explore(String edge) {
+    var Boolean keepExploring = true
+
+    while (keepExploring) {
+        eval(new AND_Gateway_072gr8o_Branch0())@self
+        eval(new AND_Gateway_072gr8o_Branch1())@self
+
+        in("Flow_15w4dk6")@self
+        in("Flow_0s8nmup")@self
+
+        eval(new Filter_Discovered_Area("Flow_1crbevj"))@self
+        in("Flow_1crbevj")@self
+
+        eval(new Check_Battery("Flow_batt", 14.5))@self
+        in("Flow_batt")@self
+
+        in("battery", var String status)@self
+        if (!status.equals("high")) {
+            keepExploring = false
+        }
+    }
+
+    out(edge)@self
+}

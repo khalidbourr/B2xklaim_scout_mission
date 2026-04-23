@@ -1,0 +1,38 @@
+package xklaim.processes
+
+import xklaim.activities.Explore
+import xklaim.activities.Initialize_Exploration_Map
+import xklaim.activities.Land
+import xklaim.activities.TakeOff
+import xklaim.activities.Recharge
+
+  
+proc X500Behavior(Locality rover_loc) {
+	
+	in("target", val Double targetX, val Double targetY, var Boolean targetReached)@self
+	out("destination", targetX, targetY)@self
+	
+	eval(new Initialize_Exploration_Map("Flow_5z75sev"))@self
+    in("Flow_5z75sev")@self
+	
+    
+    while(!targetReached){
+    	
+    	eval(new TakeOff("Flow_5ce6ev"))@self
+        in("Flow_5ce6ev")@self
+    
+	    eval(new Explore("Flow_ze7453z"))@self
+	    in("Flow_ze7453z")@self
+	    
+	    in("exploredArea", var String area)@self
+	    out("exploredArea", area)@rover_loc
+	    
+	    
+	    eval(new Land("Flow_75se3z"))@self
+	    in("Flow_75se3z")@self
+	    
+	    eval(new Recharge("Flow_7d7s2z", 16))@self
+	    in("Flow_7d7s2z")@self
+	    
+    }
+}

@@ -1,0 +1,34 @@
+package xklaim.activities
+
+import com.google.gson.JsonObject
+import com.google.gson.JsonArray
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Initialize_Map_and_Target(String edge) {
+    in("DataInput", val Double targetX, val Double targetY)@self
+
+    val globalMap = new JsonObject()
+    globalMap.addProperty("cellSize", 0.5)
+    globalMap.addProperty("cols", 141)
+    globalMap.addProperty("rows", 141)
+    globalMap.addProperty("originX", 0.0)
+    globalMap.addProperty("originY", 0.0)
+    globalMap.add("cells", new JsonArray())
+
+    out("target", targetX, targetY, false)@self
+    out("map", globalMap.toString())@self
+
+    // Publish empty initial globalMap to nav stack
+    val rosnode = new ROS2Node("xklaim_init_map")
+    val topic = new ROS2Topic<std_msgs.msg.dds.String>("/Archimede/global_map_update", std_msgs.msg.dds.String)
+    val pub = rosnode.createPublisher(topic)
+    Thread.sleep(500)   
+    val msg = new std_msgs.msg.dds.String()
+    msg.data.append(globalMap.toString())
+    pub.publish(msg)
+    rosnode.close()
+
+    println("[InitMapAndTarget] target=" + targetX + "," + targetY + " map=" + globalMap)
+    out(edge)@self
+}

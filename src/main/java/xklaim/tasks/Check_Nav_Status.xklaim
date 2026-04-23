@@ -1,0 +1,38 @@
+package xklaim.activities
+
+import java.util.concurrent.atomic.AtomicReference
+import nav_msgs.msg.dds.Odometry
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Check_Nav_Status(String edge) {
+    val rosnode = new ROS2Node("xklaim_nav_status")
+
+    val statusRef = new AtomicReference<String>("")
+    val statusTopic = new ROS2Topic<std_msgs.msg.dds.String>("/Archimede/nav_status", std_msgs.msg.dds.String)
+    rosnode.createSubscription(statusTopic, [reader |
+        statusRef.set(reader.^read().data.toString())
+    ])
+
+    val roverPos = new AtomicReference<double[]>(null)
+    val odomTopic = new ROS2Topic<Odometry>("/Archimede/odom", Odometry)
+    rosnode.createSubscription(odomTopic, [reader |
+        val msg = reader.^read()
+        roverPos.set(#[msg.pose.pose.position.x, msg.pose.pose.position.y])
+    ])
+
+    while (roverPos.get() === null) Thread.sleep(50)
+    rosnode.close()
+
+    out("roverPosition", roverPos.get().get(0), roverPos.get().get(1))@self
+
+    if (statusRef.get().equals("goal_reached")) {
+        in("target", var Double tx, var Double ty, var Boolean _r)@self
+        out("target", tx, ty, true)@self
+        println("[CheckNavStatus] arrived")
+    } else {
+        println("[CheckNavStatus] still navigating")
+    }
+
+    out(edge)@self
+}

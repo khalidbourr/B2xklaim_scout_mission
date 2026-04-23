@@ -1,0 +1,18 @@
+package xklaim
+
+import xklaim.processes.ArchimedeRoverBehavior
+import xklaim.processes.X500Behavior
+
+net TestSubscriber physical "localhost:9999" {
+
+    node X500 {
+
+        eval(new X500Behavior(ArchimedeRover))@self
+    }
+    
+    node ArchimedeRover {
+
+        eval(new ArchimedeRoverBehavior(X500))@self
+    }
+    
+}

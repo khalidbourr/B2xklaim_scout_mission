@@ -1,0 +1,27 @@
+  package xklaim.activities
+
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import std_msgs.msg.dds.Float32
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Check_Battery(String edge, double threshold) {
+    val rosnode = new ROS2Node("xklaim_battery_x500")
+    val vTopic = new ROS2Topic<Float32>("/x500/battery/voltage", Float32)
+    val received = new AtomicBoolean(false)
+    val voltageRef = new AtomicReference<Float>(0.0f)
+    rosnode.createSubscription(vTopic, [reader |
+        val msg = reader.^read()
+        if (received.compareAndSet(false, true)) {
+            voltageRef.set(msg.data)
+        }
+    ])
+
+    while (!received.get()) { Thread.sleep(50) }
+    rosnode.close()
+
+    val status = if (voltageRef.get() > threshold) "high" else "low"
+    out("battery", status)@self
+    out(edge)@self
+}

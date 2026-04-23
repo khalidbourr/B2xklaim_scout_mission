@@ -1,0 +1,77 @@
+package xklaim.activities
+
+import com.google.gson.JsonParser
+import geometry_msgs.msg.dds.PointStamped
+import geometry_msgs.msg.dds.PoseStamped
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import std_msgs.msg.dds.Bool
+import std_msgs.msg.dds.String
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Land(java.lang.String edge) {
+    val rosnode = new ROS2Node("xklaim_land_x500")
+
+    in("roverPosition", var Double rx, var Double ry)@self
+    read("explorationMap", var java.lang.String mapStr)@self
+
+    val map = JsonParser.parseString(mapStr).getAsJsonObject()
+    val tx = map.get("destX").getAsDouble()
+    val ty = map.get("destY").getAsDouble()
+
+    val dx = tx - rx
+    val dy = ty - ry
+    val dist = Math.hypot(dx, dy)
+    val leadDist = 5.0
+    val landX = if (dist > leadDist) rx + leadDist * dx / dist else tx
+    val landY = if (dist > leadDist) ry + leadDist * dy / dist else ty
+        
+
+    val dronePos = new AtomicReference<double[]>(null)
+    val poseTopic = new ROS2Topic<PointStamped>("/x500/pose", PointStamped)
+    rosnode.createSubscription(poseTopic, [reader |
+        val msg = reader.^read()
+        dronePos.set(#[msg.point.x, msg.point.y])
+    ])
+
+    val reached = new AtomicBoolean(false)
+    val reachedTopic = new ROS2Topic<Bool>("/x500/reached", Bool)
+    rosnode.createSubscription(reachedTopic, [reader |
+        if (reader.^read().data) reached.set(true)
+    ])
+
+    val landed = new AtomicBoolean(false)
+    val statusTopic = new ROS2Topic<String>("/x500/status", String)
+    rosnode.createSubscription(statusTopic, [reader |
+        val msg = reader.readLatest()
+        if (msg !== null && msg.data.toString().equals("landed")) landed.set(true)
+    ])
+
+    val goalPub = rosnode.createPublisher(new ROS2Topic<PoseStamped>("/x500/goal_pose", PoseStamped))
+    val cmdPub = rosnode.createPublisher(new ROS2Topic<String>("/x500/command", String))
+
+    Thread.sleep(1000)
+
+    if (Math.hypot(landX - dronePos.get().get(0), landY - dronePos.get().get(1)) > 3.0) {
+        val goalMsg = new PoseStamped()
+        goalMsg.pose.position.x = landX
+        goalMsg.pose.position.y = landY
+        goalMsg.pose.position.z = 2.0
+        goalPub.publish(goalMsg)
+        println("[Land] flying ahead of rover to (" + landX + ", " + landY + ")")
+        while (!reached.get()) Thread.sleep(100)
+    }
+
+    val cmdMsg = new String()
+    cmdMsg.data.append("land")
+    cmdPub.publish(cmdMsg)
+    println("[Land] land requested")
+
+    while (!landed.get()) Thread.sleep(100)
+    println("[Land] landed")
+
+    rosnode.close()
+    out(edge)@self
+    
+    }

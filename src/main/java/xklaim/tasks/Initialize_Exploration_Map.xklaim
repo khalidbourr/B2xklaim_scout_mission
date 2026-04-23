@@ -1,0 +1,19 @@
+package xklaim.activities
+
+import com.google.gson.JsonObject
+
+proc Initialize_Exploration_Map(String edge) {
+    read("destination", val Double destX, val Double destY)@self
+
+    val explorationMap = new JsonObject()
+    explorationMap.addProperty("cellSize", 0.5)
+    explorationMap.addProperty("cols", 141)
+    explorationMap.addProperty("rows", 141)
+    explorationMap.addProperty("destX", destX)
+    explorationMap.addProperty("destY", destY)
+    explorationMap.add("cells", new JsonObject())
+
+    out("explorationMap", explorationMap.toString())@self
+    println("[InitExplorationMap] map=" + explorationMap)
+    out(edge)@self
+}

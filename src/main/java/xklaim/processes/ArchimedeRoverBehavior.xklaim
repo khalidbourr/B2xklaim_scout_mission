@@ -1,0 +1,42 @@
+package xklaim.processes
+
+import klava.Locality
+import xklaim.activities.Check_Nav_Status
+import xklaim.activities.Go_To
+import xklaim.activities.Initialize_Map_and_Target
+import xklaim.tasks.Aggregate_Area_in_the_Map
+
+  
+proc ArchimedeRoverBehavior(Locality drone_loc) {
+    out("DataInput", 30.0, 12.0)@self
+
+    eval(new Initialize_Map_and_Target("Flow_init"))@self
+    in("Flow_init")@self
+
+    read("target", val Double targetX, val Double targetY, var Boolean _r)@self
+    out("target", targetX, targetY, false)@drone_loc
+
+    var Boolean reached = false
+    while (!reached) {
+        in("exploredArea", var String area)@self
+        println("[Rover] received area")
+
+        eval(new Aggregate_Area_in_the_Map("Flow_agg", area))@self
+        in("Flow_agg")@self
+        
+        eval(new Go_To("Flow_goto"))@self
+        in("Flow_goto")@self
+
+        eval(new Check_Nav_Status("Flow_chk"))@self
+        in("Flow_chk")@self
+        
+        in("roverPosition", var Double x_, var Double y_)@self
+        out("roverPosition",  x_, y_)@drone_loc
+        
+
+        read("target", val Double _x, val Double _y, var Boolean r)@self
+        reached = r
+    }
+
+    println("[Rover] mission concluded")
+}

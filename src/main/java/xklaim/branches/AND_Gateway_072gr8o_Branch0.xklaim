@@ -1,0 +1,7 @@
+package xklaim.branches
+
+import xklaim.activities.ColorDetection
+
+proc AND_Gateway_072gr8o_Branch0() {
+    eval(new ColorDetection("Flow_15w4dk6"))@self
+}

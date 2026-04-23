@@ -1,0 +1,42 @@
+package xklaim.activities
+
+import java.util.concurrent.atomic.AtomicBoolean
+import std_msgs.msg.dds.Bool
+import std_msgs.msg.dds.String
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Spiral_Navigation_Step(java.lang.String edge) {
+    val rosnode = new ROS2Node("xklaim_spiral_x500")
+
+    val revDoneTopic = new ROS2Topic<Bool>("/x500/spiral/rev_done", Bool)
+    val spiralCmdTopic = new ROS2Topic<String>("/x500/spiral/start", String)
+    val boundsTopic = new ROS2Topic<String>("/x500/bounds_json", String)
+
+    read("explorationMap", var java.lang.String mapStr)@self
+
+    val done = new AtomicBoolean(false)
+
+    rosnode.createSubscription(revDoneTopic, [reader |
+        done.set(reader.^read().data)
+    ])
+
+    val boundsPub = rosnode.createPublisher(boundsTopic)
+    val cmdPub = rosnode.createPublisher(spiralCmdTopic)
+
+    Thread.sleep(1000)
+
+    val boundsMsg = new String()
+    boundsMsg.data.append(mapStr)
+    boundsPub.publish(boundsMsg)
+
+    val cmd = new String()
+    cmd.data.append("step")
+    cmdPub.publish(cmd)
+
+    while (!done.get()) Thread.sleep(100)
+
+    rosnode.close()
+    out("spiralDone", true)@self
+    out(edge)@self
+}
