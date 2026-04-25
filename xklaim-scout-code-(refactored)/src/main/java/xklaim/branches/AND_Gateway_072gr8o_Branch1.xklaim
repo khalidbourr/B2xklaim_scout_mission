@@ -1,0 +1,8 @@
+package xklaim.branches
+
+import xklaim.activities.Spiral_Navigation_Step
+
+proc AND_Gateway_072gr8o_Branch1() {
+    eval(new Spiral_Navigation_Step("Flow_0s8nmup"))@self
+}
+

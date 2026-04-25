@@ -1,0 +1,28 @@
+package xklaim.activities
+
+import com.google.gson.JsonArray
+import com.google.gson.JsonParser
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc ColorDetection(String edge) {
+		
+    val rosnode = new ROS2Node("xklaim_colordetector_x500")
+    val statusTopic = new ROS2Topic<std_msgs.msg.dds.String>("/x500/cell_color", std_msgs.msg.dds.String)
+
+    val colors = new JsonArray()
+    rosnode.createSubscription(statusTopic, [reader |
+        val msg = reader.^read()
+        val obj = JsonParser.parseString(msg.data.toString()).getAsJsonObject()
+        synchronized(colors) { colors.add(obj) }
+    ])
+
+	in("dataSpiralDone", val Boolean done)@self
+	Thread.sleep(500)
+    rosnode.close()
+    
+    in("dataDetection", var String Dummy)@self
+    out("dataDetection", colors.toString())@self
+    
+    out(edge)@self
+}

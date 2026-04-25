@@ -1,0 +1,24 @@
+package xklaim.activities
+
+import geometry_msgs.msg.dds.PoseStamped
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc SendNavigationGoal(String edge) {
+    read("dataTarget", val Double x, val Double y, val Boolean _r)@self
+
+    val rosnode = new ROS2Node("xklaim_goto")
+    val goalTopic = new ROS2Topic<PoseStamped>("/Archimede/goal", PoseStamped)
+    val pub = rosnode.createPublisher(goalTopic)
+    
+	Thread.sleep(1000) 
+	val goalMsg = new PoseStamped()
+    goalMsg.header.setFrameId("map")
+    goalMsg.pose.position.x = x
+    goalMsg.pose.position.y = y
+    pub.publish(goalMsg)
+    Thread.sleep(500) 
+    rosnode.close()
+    println("[GoTo] goal sent (" + x + ", " + y + ")")
+    out(edge)@self
+}

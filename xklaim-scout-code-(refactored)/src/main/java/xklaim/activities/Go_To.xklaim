@@ -1,0 +1,16 @@
+package xklaim.activities
+
+import xklaim.tasks.Aggregate_Area_in_the_Map
+
+proc Go_To(String edge) {
+        eval(new Aggregate_Area_in_the_Map("Flow_agg"))@self
+        in("Flow_agg")@self
+        
+        eval(new SendNavigationGoal("Flow_goto"))@self
+        in("Flow_goto")@self
+        
+        eval(new Check_Nav_Status("Flow_chk"))@self
+        in("Flow_chk")@self
+        
+        out(edge)@self
+}

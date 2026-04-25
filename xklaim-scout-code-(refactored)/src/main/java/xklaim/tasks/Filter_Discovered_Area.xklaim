@@ -1,0 +1,57 @@
+package xklaim.tasks
+
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import java.util.HashMap
+
+proc Filter_Discovered_Area(String edge) {
+	
+    read("dataDetection", var String colorsStr)@self
+    read("dataExplorationMap", var String mapStr)@self
+    
+    val map = JsonParser.parseString(mapStr).getAsJsonObject()
+    val CELL_SIZE = map.get("cellSize").getAsDouble()
+
+    val colors = JsonParser.parseString(colorsStr).getAsJsonArray()
+    val cellMap = new HashMap<String, JsonObject>()
+        
+    for (c : colors) {
+        val cObj = c.asJsonObject
+        val cx = (cObj.get("x").getAsDouble() / CELL_SIZE) as int
+        val cy = (cObj.get("y").getAsDouble() / CELL_SIZE) as int
+        val sectors = cObj.get("sectors").getAsJsonArray()
+
+        for (s : sectors) {
+            val sObj = s.asJsonObject
+            val sectorColor = sObj.get("color").getAsString()
+            if (!"unknown".equals(sectorColor)) {
+                val baseDx = sObj.get("dx").getAsInt() * 6
+                val baseDy = sObj.get("dy").getAsInt() * 6
+                val traversable = "green".equals(sectorColor)
+                for (ddx : 0 .. 5) {
+                    for (ddy : 0 .. 5) {
+                        val gx = cx + baseDx + ddx
+                        val gy = cy + baseDy + ddy
+                        val key = gx + "," + gy
+                            val cell = new JsonObject()
+                            cell.addProperty("gx", gx)
+                            cell.addProperty("gy", gy)
+                            cell.addProperty("traversable", traversable)
+                            cellMap.put(key, cell)
+                    }
+                }
+            }
+        }
+    }
+    
+    Thread.sleep(500)
+    val area = new JsonArray()
+    for (v : cellMap.values()) area.add(v)
+    
+    in("dataExploredArea", var String dummy)@self
+    out("dataExploredArea", area.toString())@self
+    
+    println("[FilterArea] colors=" + colors.size() + " cells=" + area.size())
+    out(edge)@self
+}

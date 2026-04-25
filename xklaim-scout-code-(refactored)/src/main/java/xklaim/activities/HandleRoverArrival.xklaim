@@ -1,0 +1,8 @@
+package xklaim.activities
+
+proc HandleRoverArrival() {
+    in("notifyArrival", var Boolean arrival)@self
+    println("[HandleRoverArrival] rover arrival received")
+    in("dataDestination", val Double destX, val Double destY, val Boolean destinationReached)@self
+    out("dataDestination", destX, destY, arrival)@self
+}

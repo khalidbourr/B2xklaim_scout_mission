@@ -1,0 +1,38 @@
+  package xklaim.activities
+
+import java.util.concurrent.atomic.AtomicBoolean
+import std_msgs.msg.dds.Float32
+import std_msgs.msg.dds.String
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Recharge(java.lang.String edge, double threshold) {
+    val rosnode = new ROS2Node("xklaim_recharge_x500")
+
+    val cmdTopic = new ROS2Topic<String>("/x500/battery/command", String)
+    val cmdPub = rosnode.createPublisher(cmdTopic)
+
+    val voltTopic = new ROS2Topic<Float32>("/x500/battery/voltage", Float32)
+    val charged = new AtomicBoolean(false)
+    rosnode.createSubscription(voltTopic, [reader |
+        val v = reader.^read().data
+        if (v >= threshold) {
+            charged.set(true)
+        }
+    ])
+
+    Thread.sleep(1000)
+
+    val cmdMsg = new String()
+    cmdMsg.data.append("charge")
+    println("[Recharge] charging started, waiting for v >= " + threshold)
+
+    while (!charged.get()) {
+        cmdPub.publish(cmdMsg)
+        Thread.sleep(500)
+    }
+    println("[Recharge] fully charged")
+
+    rosnode.close()
+    out(edge)@self
+}

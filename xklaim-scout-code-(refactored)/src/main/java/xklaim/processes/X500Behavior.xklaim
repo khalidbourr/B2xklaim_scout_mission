@@ -1,0 +1,49 @@
+package xklaim.processes
+
+import xklaim.activities.Explore
+import xklaim.activities.Initialize_Exploration_Map
+import xklaim.activities.Land
+import xklaim.activities.TakeOff
+import xklaim.activities.Recharge
+import xklaim.activities.HandleRoverArrival
+
+proc X500Behavior(Locality rover_loc) {
+    out("dataDestination", 0.0, 0.0, false)@self
+    out("dataExplorationMap", "")@self
+    out("dataExploredArea", "")@self
+    out("dataPosition", 0.0, 0.0)@self
+	out("dataDetection", "")@self
+	out("dataBattery", "")@self
+	
+	eval(new HandleRoverArrival())@self
+	
+	in("target", val Double targetX, val Double targetY, var Boolean targetReached)@self
+	in("dataDestination", val Double dummyx, val Double dummyy, val Boolean dummyReached)@self
+	out("dataDestination", targetX, targetY, targetReached)@self
+	
+	eval(new Initialize_Exploration_Map("Flow_5z75sev"))@self
+    in("Flow_5z75sev")@self
+	
+    while(!targetReached){
+    	
+    	eval(new TakeOff("Flow_5ce6ev"))@self
+        in("Flow_5ce6ev")@self
+    
+	    eval(new Explore("Flow_ze7453z"))@self
+	    in("Flow_ze7453z")@self
+	    
+	    read("dataExploredArea", var String area)@self
+	    out("exploredArea", area)@rover_loc
+	    
+	    in("roverPosition", var Double x, var Double y)@self	    
+	    in("dataPosition", var Double dummyposx, var Double dummyposy)@self	    
+	    out("dataPosition",x,y)@self
+	        
+	    eval(new Land("Flow_75se3z"))@self
+	    in("Flow_75se3z")@self
+	    
+	    eval(new Recharge("Flow_7d7s2z", 16))@self
+	    in("Flow_7d7s2z")@self
+	    
+    }
+}

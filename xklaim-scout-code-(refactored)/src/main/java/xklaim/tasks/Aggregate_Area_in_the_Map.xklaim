@@ -1,0 +1,64 @@
+package xklaim.tasks
+
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import java.util.HashMap
+import us.ihmc.jros2.ROS2Node
+import us.ihmc.jros2.ROS2Topic
+
+proc Aggregate_Area_in_the_Map(String edge) {
+    read("dataMap", var String mapStr)@self
+    read("dataArea", var String areaStr)@self
+    val map = JsonParser.parseString(mapStr).getAsJsonObject()
+    val cells = map.get("cells").getAsJsonArray()
+
+    val cellIndex = new HashMap<String, JsonObject>()
+    for (c : cells) {
+        val cObj = c.asJsonObject
+        val key = cObj.get("gx").getAsInt() + "," + cObj.get("gy").getAsInt()
+        cellIndex.put(key, cObj)
+    }
+
+    val incoming = JsonParser.parseString(areaStr).getAsJsonArray()
+    var int added = 0
+
+    for (c : incoming) {
+        val cObj = c.asJsonObject
+        val gx = cObj.get("gx").getAsInt()
+        val gy = cObj.get("gy").getAsInt()
+        val traversable = cObj.get("traversable").getAsBoolean()
+        val key = gx + "," + gy
+        val existing = cellIndex.get(key)
+        if (existing === null) {
+            val newCell = new JsonObject()
+            newCell.addProperty("gx", gx)
+            newCell.addProperty("gy", gy)
+            newCell.addProperty("traversable", traversable)
+            cells.add(newCell)
+            cellIndex.put(key, newCell)
+            added = added + 1
+        } else {
+            if (!traversable) {
+                existing.addProperty("traversable", false)
+            }
+        }
+    }
+
+    val updatedMap = map.toString()
+    in("dataMap", var String dummymapStr)@self
+    out("dataMap", updatedMap)@self
+
+    // Republish updated map to the nav stack so PlannerNode sees new obstacles
+    val rosnode = new ROS2Node("xklaim_aggregate_map")
+    val topic = new ROS2Topic<std_msgs.msg.dds.String>("/Archimede/global_map_update", std_msgs.msg.dds.String)
+    val pub = rosnode.createPublisher(topic)
+    Thread.sleep(1000)
+    val msg = new std_msgs.msg.dds.String()
+    msg.data.append(updatedMap)
+    pub.publish(msg)
+    Thread.sleep(1000)
+    rosnode.close()
+
+    println("[Aggregate] map has " + cells.size() + " cells, added " + added + " new (republished)")
+    out(edge)@self
+}
