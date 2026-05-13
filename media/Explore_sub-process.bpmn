@@ -11,7 +11,7 @@
       <bpmn:outgoing>Flow_08rzk0i</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_1nefhcf" sourceRef="Gateway_072gr8o" targetRef="Activity_0q3o3qk" />
-    <bpmn:scriptTask id="Activity_0q3o3qk" name="Spiral_Navigation_Step">
+    <bpmn:scriptTask id="Activity_0q3o3qk" name="Spiral Navigation Step">
       <bpmn:incoming>Flow_1nefhcf</bpmn:incoming>
       <bpmn:outgoing>Flow_0s8nmup</bpmn:outgoing>
       <bpmn:property id="Property_0aiehc0" name="__targetRef_placeholder" />
@@ -24,7 +24,7 @@
       </bpmn:dataOutputAssociation>
     </bpmn:scriptTask>
     <bpmn:sequenceFlow id="Flow_08rzk0i" sourceRef="Gateway_072gr8o" targetRef="Activity_0bntbkg" />
-    <bpmn:scriptTask id="Activity_0bntbkg" name="Color_Detection">
+    <bpmn:scriptTask id="Activity_0bntbkg" name="Color Detection">
       <bpmn:incoming>Flow_08rzk0i</bpmn:incoming>
       <bpmn:outgoing>Flow_15w4dk6</bpmn:outgoing>
       <bpmn:property id="Property_161qcwu" name="__targetRef_placeholder" />
@@ -43,7 +43,7 @@
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_0s8nmup" sourceRef="Activity_0q3o3qk" targetRef="Gateway_0dwdsjm" />
     <bpmn:sequenceFlow id="Flow_15w4dk6" sourceRef="Activity_0bntbkg" targetRef="Gateway_0dwdsjm" />
-    <bpmn:dataObjectReference id="DataObjectReference_0a8dq04" name="dataDetection" dataObjectRef="DataObject_09n49md">
+    <bpmn:dataObjectReference id="DataObjectReference_0a8dq04" name="detection" dataObjectRef="DataObject_09n49md">
       <bpmn:extensionElements>
         <camunda:properties>
           <camunda:property name="pos" value="Positions" />
@@ -52,7 +52,7 @@
     </bpmn:dataObjectReference>
     <bpmn:dataObject id="DataObject_09n49md" />
     <bpmn:sequenceFlow id="Flow_0pbx0px" sourceRef="Gateway_0dwdsjm" targetRef="Activity_0ccanov" />
-    <bpmn:scriptTask id="Activity_0ccanov" name="Filter_Discovered_Area">
+    <bpmn:scriptTask id="Activity_0ccanov" name="Filter Discovered Area">
       <bpmn:incoming>Flow_0pbx0px</bpmn:incoming>
       <bpmn:outgoing>Flow_1crbevj</bpmn:outgoing>
       <bpmn:property id="Property_0r28wt6" name="__targetRef_placeholder" />
@@ -60,15 +60,15 @@
         <bpmn:sourceRef>DataObjectReference_0a8dq04</bpmn:sourceRef>
         <bpmn:targetRef>Property_0r28wt6</bpmn:targetRef>
       </bpmn:dataInputAssociation>
-      <bpmn:dataInputAssociation id="DataInputAssociation_15zeagp">
-        <bpmn:sourceRef>DataObjectReference_10b8uni</bpmn:sourceRef>
+      <bpmn:dataInputAssociation id="DataInputAssociation_16grb28">
+        <bpmn:sourceRef>DataObjectReference_046ydzs</bpmn:sourceRef>
         <bpmn:targetRef>Property_0r28wt6</bpmn:targetRef>
       </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOutputAssociation_0vs4psd">
         <bpmn:targetRef>DataObjectReference_08afrmo</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:scriptTask>
-    <bpmn:dataObjectReference id="DataObjectReference_08afrmo" name="dataExploredArea" dataObjectRef="DataObject_1su1sgc">
+    <bpmn:dataObjectReference id="DataObjectReference_08afrmo" name="explored area" dataObjectRef="DataObject_1su1sgc">
       <bpmn:extensionElements>
         <camunda:properties>
           <camunda:property name="area" value="Area" />
@@ -83,14 +83,14 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_087fu4v" sourceRef="Gateway_0q8a77l" targetRef="Gateway_072gr8o" />
     <bpmn:sequenceFlow id="Flow_1crbevj" sourceRef="Activity_0ccanov" targetRef="Activity_1e26xy1" />
-    <bpmn:scriptTask id="Activity_1e26xy1" name="Check_Battery">
+    <bpmn:scriptTask id="Activity_1e26xy1" name="Check Battery">
       <bpmn:incoming>Flow_1crbevj</bpmn:incoming>
       <bpmn:outgoing>Flow_1kzlivo</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOutputAssociation_0j84qdp">
         <bpmn:targetRef>DataObjectReference_1v81t1m</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:scriptTask>
-    <bpmn:dataObjectReference id="DataObjectReference_1v81t1m" name="dataBattery" dataObjectRef="DataObject_10zwgga">
+    <bpmn:dataObjectReference id="DataObjectReference_1v81t1m" name="battery" dataObjectRef="DataObject_10zwgga">
       <bpmn:extensionElements>
         <camunda:properties>
           <camunda:property name="status" value="String" />
@@ -105,13 +105,13 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1kzlivo" sourceRef="Activity_1e26xy1" targetRef="Gateway_0o6kvld" />
     <bpmn:sequenceFlow id="Flow_0z3w7e8" name="yes" sourceRef="Gateway_0o6kvld" targetRef="Gateway_0q8a77l">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=battery.status.equals("high")</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">battery.status.equals("high")</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_0401prg" name="terminate exploration">
       <bpmn:incoming>Flow_118laqw</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_118laqw" name="no" sourceRef="Gateway_0o6kvld" targetRef="Event_0401prg" />
-    <bpmn:dataObjectReference id="DataObjectReference_046ydzs" name="dataExplorationMap" dataObjectRef="DataObject_0e1yjoy">
+    <bpmn:dataObjectReference id="DataObjectReference_046ydzs" name="exploration map" dataObjectRef="DataObject_0e1yjoy">
       <bpmn:extensionElements>
         <camunda:properties>
           <camunda:property name="map" value="LocalMap" />
@@ -119,16 +119,8 @@
       </bpmn:extensionElements>
     </bpmn:dataObjectReference>
     <bpmn:dataObject id="DataObject_0e1yjoy" />
-    <bpmn:dataObjectReference id="DataObjectReference_19e0n2d" name="dataSpiralDone" dataObjectRef="DataObject_1dc4bxd" />
+    <bpmn:dataObjectReference id="DataObjectReference_19e0n2d" name="spiral done" dataObjectRef="DataObject_1dc4bxd" />
     <bpmn:dataObject id="DataObject_1dc4bxd" />
-    <bpmn:dataObjectReference id="DataObjectReference_10b8uni" name="dataExplorationMap" dataObjectRef="DataObject_0tic5a5">
-      <bpmn:extensionElements>
-        <camunda:properties>
-          <camunda:property name="map" value="LocalMap" />
-        </camunda:properties>
-      </bpmn:extensionElements>
-    </bpmn:dataObjectReference>
-    <bpmn:dataObject id="DataObject_0tic5a5" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Explore">
@@ -155,7 +147,7 @@
       <bpmndi:BPMNShape id="DataObjectReference_0a8dq04_di" bpmnElement="DataObjectReference_0a8dq04">
         <dc:Bounds x="642" y="331" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="626" y="388" width="68" height="14" />
+          <dc:Bounds x="617" y="313" width="45" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1hta79t_di" bpmnElement="Activity_0ccanov">
@@ -165,7 +157,7 @@
       <bpmndi:BPMNShape id="DataObjectReference_1e2i5u5_di" bpmnElement="DataObjectReference_08afrmo">
         <dc:Bounds x="772" y="315" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="747" y="372" width="89" height="14" />
+          <dc:Bounds x="758" y="372" width="68" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0q8a77l_di" bpmnElement="Gateway_0q8a77l" isMarkerVisible="true">
@@ -178,7 +170,7 @@
       <bpmndi:BPMNShape id="DataObjectReference_1v81t1m_di" bpmnElement="DataObjectReference_1v81t1m">
         <dc:Bounds x="942" y="315" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="933" y="372" width="57" height="14" />
+          <dc:Bounds x="945" y="372" width="34" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0o6kvld_di" bpmnElement="Gateway_0o6kvld" isMarkerVisible="true">
@@ -193,22 +185,16 @@
           <dc:Bounds x="1093" y="275" width="54" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="DataObjectReference_046ydzs_di" bpmnElement="DataObjectReference_046ydzs">
-        <dc:Bounds x="352" y="155" width="36" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="327" y="215" width="86" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DataObjectReference_19e0n2d_di" bpmnElement="DataObjectReference_19e0n2d">
         <dc:Bounds x="422" y="215" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="352" y="273" width="76" height="14" />
+          <dc:Bounds x="363" y="233" width="54" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1irkkug" bpmnElement="DataObjectReference_10b8uni">
-        <dc:Bounds x="702" y="415" width="36" height="50" />
+      <bpmndi:BPMNShape id="DataObjectReference_046ydzs_di" bpmnElement="DataObjectReference_046ydzs">
+        <dc:Bounds x="242" y="405" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="677" y="475" width="86" height="27" />
+          <dc:Bounds x="221" y="465" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1patyjx_di" bpmnElement="Flow_1patyjx">
@@ -221,8 +207,9 @@
         <di:waypoint x="390" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_1d2rpvb_di" bpmnElement="DataInputAssociation_1d2rpvb">
-        <di:waypoint x="388" y="173" />
-        <di:waypoint x="417" y="160" />
+        <di:waypoint x="260" y="405" />
+        <di:waypoint x="260" y="90" />
+        <di:waypoint x="390" y="90" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_16apb37_di" bpmnElement="DataOutputAssociation_16apb37">
         <di:waypoint x="439" y="160" />
@@ -238,8 +225,10 @@
         <di:waypoint x="440" y="320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_0f6l4an_di" bpmnElement="DataOutputAssociation_0f6l4an">
-        <di:waypoint x="490" y="361" />
-        <di:waypoint x="642" y="361" />
+        <di:waypoint x="440" y="400" />
+        <di:waypoint x="440" y="410" />
+        <di:waypoint x="660" y="410" />
+        <di:waypoint x="660" y="381" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0s8nmup_di" bpmnElement="Flow_0s8nmup">
         <di:waypoint x="490" y="120" />
@@ -258,10 +247,6 @@
       <bpmndi:BPMNEdge id="DataInputAssociation_0e3bbpk_di" bpmnElement="DataInputAssociation_0e3bbpk">
         <di:waypoint x="671" y="331" />
         <di:waypoint x="690" y="290" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="DataInputAssociation_15zeagp_di" bpmnElement="DataInputAssociation_15zeagp">
-        <di:waypoint x="720" y="415" />
-        <di:waypoint x="720" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_0vs4psd_di" bpmnElement="DataOutputAssociation_0vs4psd">
         <di:waypoint x="751" y="290" />
@@ -298,6 +283,11 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1068" y="232" width="13" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataInputAssociation_16grb28_di" bpmnElement="DataInputAssociation_16grb28">
+        <di:waypoint x="280" y="430" />
+        <di:waypoint x="720" y="430" />
+        <di:waypoint x="720" y="290" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
